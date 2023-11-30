@@ -1,5 +1,4 @@
 import flatpickr from 'flatpickr';
-import { Notiflix } from 'notiflix';
 
 const options = {
   enableTime: true,
@@ -7,13 +6,13 @@ const options = {
   defaultDate: new Date(),
   minuteIncrement: 1,
   onClose(selectedDates) {
-    console.log(selectedDates[0]);
+    const selectedDate = selectedDates[0];
 
-    if (selectedDate < new Date()) {
-      Notiflix.alert('Please choose a date in the future');
+    if (selectedDate <= new Date()) {
+      alert('Please choose a date in the future');
       document.querySelector('[data-start]').disabled = true;
     } else {
-      document.querySelector('[data-start]').disabled = false;
+      document.querySelector('[data-start]').removeAttribute('disabled');
     }
   },
 };
@@ -23,6 +22,47 @@ flatpickr('#datetime-picker', options);
 function addLeadingZero(value) {
   return value.toString().padStart(2, '0');
 }
+
+function updateTimer(selectedDate) {
+  const endDate = new Date(selectedDate).getTime();
+
+  function update() {
+    const currentDate = new Date().getTime();
+    const remainingTime = endDate - currentDate;
+
+    if (remainingTime <= 0) {
+      clearInterval(timerInterval);
+      document
+        .querySelectorAll('[data-value]')
+        .forEach(el => (el.textContent = '00'));
+      alert('Countdown finished!');
+      return;
+    }
+
+    const { days, hours, minutes, seconds } = convertMs(remainingTime);
+
+    document.querySelector('[data-days]').textContent = addLeadingZero(days);
+    document.querySelector('[data-hours]').textContent = addLeadingZero(hours);
+    document.querySelector('[data-minutes]').textContent =
+      addLeadingZero(minutes);
+    document.querySelector('[data-seconds]').textContent =
+      addLeadingZero(seconds);
+  }
+
+  const timerInterval = setInterval(update, 1000);
+}
+
+document.querySelector('[data-start]').addEventListener('click', function () {
+  const selectedDate = document.querySelector('#datetime-picker').value;
+
+  if (!selectedDate) {
+    alert('Please choose a date first');
+    return;
+  }
+
+  updateTimer(selectedDate);
+  this.setAttribute('disabled', true);
+});
 
 function convertMs(ms) {
   const second = 1000;
@@ -37,30 +77,3 @@ function convertMs(ms) {
 
   return { days, hours, minutes, seconds };
 }
-
-function updateTimer() {
-  const startDate = new Date();
-  const endDate = flatpickr('#datetime-picker').selectedDates[0];
-  const timeDiff = endDate - startDate;
-
-  if (timeDiff <= 0) {
-    clearInterval(timerInterval);
-    Notiflix.notify('Countdown completed!');
-    document.querySelector('[data-start]').disabled = true;
-  } else {
-    const { days, hours, minutes, seconds } = convertMs(timeDiff);
-    document.querySelector('[data-days]').textContent = addLeadingZero(days);
-    document.querySelector('[data-hours]').textContent = addLeadingZero(hours);
-    document.querySelector('[data-minutes]').textContent =
-      addLeadingZero(minutes);
-    document.querySelector('[data-seconds]').textContent =
-      addLeadingZero(seconds);
-  }
-}
-
-let timerInterval;
-
-document.querySelector('[data-start]').addEventListener('click', () => {
-  timerInterval = setInterval(updateTimer, 1000);
-  updateTimer(); // Initial update to avoid one-second delay
-});
