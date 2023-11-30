@@ -4,11 +4,10 @@ function getRandomHexColor() {
 
 let colorChangeInterval;
 
-function startColorChange() {
-  const startButton = document.querySelector('[data-start]');
-  const stopButton = document.querySelector('[data-stop]');
+const startButton = document.querySelector('[data-start]');
+const stopButton = document.querySelector('[data-stop]');
 
-  // Wyłącz przycisk "Start"
+function startColorChange() {
   startButton.disabled = true;
 
   // Rozpocznij zmianę koloru co sekundę
@@ -18,19 +17,11 @@ function startColorChange() {
 }
 
 function stopColorChange() {
-  const startButton = document.querySelector('[data-start]');
-
-  // Włącz przycisk "Start"
   startButton.disabled = false;
 
-  // Zatrzymaj zmianę koloru
   clearInterval(colorChangeInterval);
 }
 
 // Dodaj event listenery do przycisków
-document
-  .querySelector('[data-start]')
-  .addEventListener('click', startColorChange);
-document
-  .querySelector('[data-stop]')
-  .addEventListener('click', stopColorChange);
+startButton.addEventListener('click', startColorChange);
+stopButton.addEventListener('click', stopColorChange);
